@@ -1,10 +1,14 @@
 package com.projectku.myactionbar
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
+import android.widget.Toast
 import com.projectku.myactionbar.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -16,19 +20,40 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.option_menu, menu)
+
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchView = menu.findItem(R.id.search).actionView as androidx.appcompat.widget.SearchView
+
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        searchView.queryHint = resources.getString(R.string.search_hint)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Toast.makeText(this@MainActivity, query , Toast.LENGTH_SHORT).show()
+                searchView.clearFocus()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+
+
+        })
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
        when(item.itemId){
            R.id.menu1 -> {
+               /*
+               Ketika menu ditekan maka akan memunculkan fragment,
+               fragment di tambahkan ke dalam backstack sehingga ketika ditekan back akan kembali ke MainActivity
+                */
                supportFragmentManager.beginTransaction()
                    .replace(R.id.fragment_container, MenuFragment())
                    .addToBackStack(null)
@@ -36,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                return true
            }
            R.id.menu2 -> {
-               val i = Intent(this, MainActivity::class.java)
+               val i = Intent(this, MenuActivity::class.java)
                startActivity(i)
                return true
            }
